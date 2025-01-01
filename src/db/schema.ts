@@ -1,5 +1,8 @@
+// import { relations } from "drizzle-orm";
 import {
   integer,
+  pgEnum,
+  // boolean,
   pgTable,
   text,
   timestamp,
@@ -7,19 +10,30 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
 
 // Enums
+export const userRoleEnum = pgEnum("user_role", ["admin", "client"]);
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(),
-  name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  image: varchar("image", { length: 255 }),
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  name: varchar("name", { length: 255 }).notNull(),
+  password: varchar("password", { length: 255 }).notNull(),
+  role: userRoleEnum("role").default("client").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
+// Categories Table
+
+// Products Table
+
 export const transactions = pgTable("transactions", {
-  id: uuid("id").primaryKey(),
-  userId: varchar("userId", { length: 255 })
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("userId")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name", { length: 256 }).notNull(),
@@ -31,7 +45,11 @@ export const transactions = pgTable("transactions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const transactionInsertSchema = createInsertSchema(transactions);
-export const transactionSelectSchema = createSelectSchema(transactions);
-export const userSelectSchema = createSelectSchema(users);
-export const userInsertSchema = createInsertSchema(users);
+export const insertUserSchema = createInsertSchema(users, {
+  id: z.string().optional(),
+});
+export const selectUserSchema = createSelectSchema(users);
+export const insertTransactionSchema = createInsertSchema(transactions, {
+  id: z.string().optional(),
+});
+export const selectTransactionSchema = createSelectSchema(transactions);
