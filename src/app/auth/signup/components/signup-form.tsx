@@ -53,7 +53,7 @@ export function SignUpForm() {
         title: "Account created",
         description: "You can now sign in with your new account.",
       })
-      router.push("/signin")
+      router.push("/auth/signin")
     }
   }
 
