@@ -9,6 +9,7 @@ import { getUserId } from "@/lib/auth"
 export default async function Dashboard() {
   const chartData = await getChartData()
   const userId = await getUserId()
+  console.log("data",chartData)
 
   return (
     <main className="container mx-auto p-4 space-y-8">

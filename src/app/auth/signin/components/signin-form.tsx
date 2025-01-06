@@ -50,7 +50,7 @@ export function SignInForm() {
         description: "Please check your credentials and try again.",
       })
     } else {
-      router.push("/dashboard")
+      router.push("/")
       router.refresh()
     }
   }

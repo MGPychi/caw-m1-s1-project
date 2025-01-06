@@ -41,29 +41,35 @@ export async function getSummary() {
 }
 
 export async function getChartData() {
-  try {
-    const userId = await getUserId();
-    const result = await db
-      .select({
-        totalIncome: sql<number>`COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0)`,
-        totalExpenses: sql<number>`COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0)`,
-        categoryExpenses: sql<Record<string, number>>`
-          jsonb_object_agg(
-            category,
-            COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0)
-          )
-        `,
-      })
-      .from(transactions)
-      .where(eq(transactions.userId, userId));
+  const userId = await getUserId()
 
-    return {
-      totalIncome: result[0].totalIncome,
-      totalExpenses: result[0].totalExpenses,
-      categoryExpenses: result[0].categoryExpenses || {},
-    };
-  } catch (error) {
-    console.error(error);
-    return { totalIncome: 0, totalExpenses: 0, categoryExpenses: {} };
+  // Get expenses by category
+  const expensesByCategory = await db
+    .select({
+      category: transactions.category,
+      total: sql<number>`sum(${transactions.amount})`,
+    })
+    .from(transactions)
+    .where(sql`${transactions.userId} = ${userId} AND ${transactions.type} = 'expense'`)
+    .groupBy(transactions.category)
+
+  // Get monthly income and expenses
+  const monthlyData = await db
+    .select({
+      month: sql<string>`to_char(${transactions.date}, 'YYYY-MM')`,
+      income: sql<number>`sum(CASE WHEN ${transactions.type} = 'income' THEN ${transactions.amount} ELSE 0 END)`,
+      expenses: sql<number>`sum(CASE WHEN ${transactions.type} = 'expense' THEN ${transactions.amount} ELSE 0 END)`,
+    })
+    .from(transactions)
+    .where(sql`${transactions.userId} = ${userId}`)
+    .groupBy(sql`to_char(${transactions.date}, 'YYYY-MM')`)
+    .orderBy(sql`to_char(${transactions.date}, 'YYYY-MM')`)
+
+  return {
+    expenses: {
+      byCategory: expensesByCategory,
+      byMonth: monthlyData,
+    },
   }
 }
+

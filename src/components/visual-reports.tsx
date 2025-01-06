@@ -1,107 +1,51 @@
-'use client'
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, Pie, PieChart, ResponsiveContainer, Cell } from "recharts"
+import { ExpensesPieChart } from "./visual/ExpensesPieChart"
+import { MonthlyOverviewBarChart } from "./visual/MonthlyOverviewBarChart"
+import { SpendingTrendLineChart } from "./visual/SpendingTrendLineChart"
 
 interface ChartData {
-  totalIncome: number
-  totalExpenses: number
-  categoryExpenses: Record<string, number>
+  expenses: {
+    byCategory: { category: string; total: number }[]
+    byMonth: { month: string; income: number; expenses: number }[]
+  }
 }
 
 export function VisualReports({ data }: { data: ChartData }) {
-  const incomeVsExpenses = [
-    { name: "Income", value: data.totalIncome / 100 },
-    { name: "Expenses", value: data.totalExpenses / 100 },
-  ]
-
-  const categoryExpenses = Object.entries(data.categoryExpenses).map(([name, value]) => ({
-    name,
-    value: value / 100,
-  }))
-
-  const colors = [
-    "#10B981",
-    "#3B82F6",
-    "#6366F1",
-    "#8B5CF6",
-    "#EC4899",
-    "#F43F5E",
-    "#F59E0B",
-  ]
-
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
-        <CardTitle>Visual Reports</CardTitle>
+        <CardTitle>Financial Reports</CardTitle>
+        <CardDescription>
+          Visualize your financial data through different chart types
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="bar">
-          <TabsList>
-            <TabsTrigger value="bar">Income vs Expenses</TabsTrigger>
-            <TabsTrigger value="pie">Expense Distribution</TabsTrigger>
+        <Tabs defaultValue="category" className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="category">Expenses by Category</TabsTrigger>
+            <TabsTrigger value="monthly">Monthly Overview</TabsTrigger>
+            <TabsTrigger value="trend">Spending Trend</TabsTrigger>
           </TabsList>
-          <TabsContent value="bar">
-            <ChartContainer config={{}} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeVsExpenses}>
-                  <Bar dataKey="value">
-                    {incomeVsExpenses.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={index === 0 ? colors[0] : colors[1]} />
-                    ))}
-                  </Bar>
-                  <ChartTooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <ChartTooltipContent
-                            title={payload[0]!.payload.name}
-                            // content={payload && payload[0] && typeof payload[0].value === 'number' ? `$${payload[0].value.toFixed(2)}` : undefined}
-                          />
-                        )
-                      }
-                      return null
-                    }}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+
+          <TabsContent value="category">
+            <div className="h-[400px] w-full">
+              <ExpensesPieChart data={data.expenses.byCategory} />
+            </div>
           </TabsContent>
-          <TabsContent value="pie">
-            <ChartContainer config={{}} className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryExpenses}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    label={(entry) => entry.name}
-                  >
-                    {categoryExpenses.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                    ))}
-                  </Pie>
-                  <ChartTooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <ChartTooltipContent
-                            title={String(payload[0]!.name)}
-                            // content={`$${(payload[0].value as number).toFixed(2)}`}
-                          />
-                        )
-                      }
-                      return null
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartContainer>
+
+          <TabsContent value="monthly">
+            <div className="h-[400px] w-full">
+              <MonthlyOverviewBarChart data={data.expenses.byMonth} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="trend">
+            <div className="h-[400px] w-full">
+              <SpendingTrendLineChart data={data.expenses.byMonth} />
+            </div>
           </TabsContent>
         </Tabs>
       </CardContent>
