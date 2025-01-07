@@ -2,9 +2,8 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ExpensesPieChart } from "./visual/ExpensesPieChart"
-import { MonthlyOverviewBarChart } from "./visual/MonthlyOverviewBarChart"
-import { SpendingTrendLineChart } from "./visual/SpendingTrendLineChart"
+import { MonthlyOverviewBarChart } from "@/components/visual/MonthlyOverviewBarChart"
+import { SpendingTrendLineChart } from "@/components/visual/SpendingTrendLineChart"
 
 interface ChartData {
   expenses: {
@@ -25,16 +24,9 @@ export function VisualReports({ data }: { data: ChartData }) {
       <CardContent>
         <Tabs defaultValue="category" className="space-y-4">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="category">Expenses by Category</TabsTrigger>
             <TabsTrigger value="monthly">Monthly Overview</TabsTrigger>
             <TabsTrigger value="trend">Spending Trend</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="category">
-            <div className="h-[400px] w-full">
-              <ExpensesPieChart data={data.expenses.byCategory} />
-            </div>
-          </TabsContent>
 
           <TabsContent value="monthly">
             <div className="h-[400px] w-full">

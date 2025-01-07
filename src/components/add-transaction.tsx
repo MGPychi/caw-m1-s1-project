@@ -45,11 +45,10 @@ export function AddTransaction({ userId }: { userId: string }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsPending(true)
     
-    const amountInCents = Math.round(parseFloat(values.amount) * 100)
     
     await addTransaction({
       ...values,
-      amount: amountInCents,
+      amount: parseInt(values.amount),
       date: new Date(),
       userId,
     })

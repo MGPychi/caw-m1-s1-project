@@ -73,3 +73,18 @@ export async function getChartData() {
   }
 }
 
+
+
+export async function fetchTransactionDataForUser(userId: string) {
+  const results = await db
+    .select({
+      category: transactions.category,
+      totalAmount: sql<number>`SUM(${transactions.amount})`.as("totalAmount"),
+    })
+    .from(transactions)
+    .where(sql`${transactions.userId} = ${userId}`) // Filter by userId
+    .groupBy(transactions.category)
+    .orderBy(sql`SUM(${transactions.amount})`); // Optional: Order by total amount
+
+  return results;
+}

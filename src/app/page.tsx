@@ -3,13 +3,15 @@ import { AddTransaction } from "@/components/add-transaction"
 import { Overview } from "@/components/overview"
 import { TransactionList } from "@/components/transaction-list"
 import { VisualReports } from "@/components/visual-reports"
-import { getChartData } from "./data/transactions-data"
+import { fetchTransactionDataForUser, getChartData } from "./data/transactions-data"
 import { getUserId } from "@/lib/auth"
+import { TransactionPieChart } from "@/components/TransactionPieChart"
 
 export default async function Dashboard() {
   const chartData = await getChartData()
   const userId = await getUserId()
-  console.log("data",chartData)
+  const data = await fetchTransactionDataForUser(userId)
+  console.log("data",data)
 
   return (
     <main className="container mx-auto p-4 space-y-8">
@@ -29,6 +31,10 @@ export default async function Dashboard() {
       <Suspense fallback={<div>Loading reports...</div>}>
         <VisualReports data={chartData} />
       </Suspense>
+
+      {/* <Suspense fallback={<div>Loading reports...</div>}> */}
+      <TransactionPieChart data={data}/>
+      {/* </Suspense> */}
     </main>
   )
 }

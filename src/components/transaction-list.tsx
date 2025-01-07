@@ -36,7 +36,7 @@ export async function TransactionList() {
                   }`}
                 >
                   {transaction.type === "income" ? "+" : "-"}$
-                  {(transaction.amount / 100).toFixed(2)}
+                  {(transaction.amount).toFixed(2)}
                 </p>
                 <DeleteTransaction id={transaction.id} />
               </div>
